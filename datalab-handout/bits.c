@@ -143,6 +143,8 @@ NOTES:
  *   Rating: 1
  */
 int bitXor(int x, int y) {
+  //x ^ y = ~x & y | x & ~y;
+  //x | y = ~(~x & ~y); De Morgan's laws 
   return ~(~(~x & y) & ~(x & ~y));
 }
 /* 
@@ -153,7 +155,7 @@ int bitXor(int x, int y) {
  */
 int tmin(void) {
 
-  return 2;
+  return -1 << 31;
 
 }
 //2
@@ -165,7 +167,7 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
-  return 2;
+  return (x + 1) >> 31;
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -186,7 +188,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return (~x) + 1;
 }
 //3
 /* 
@@ -209,8 +211,11 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  // 相当于MUX的实现
+  int s = !x; // s equal 0(output y) or 1(output z)
+  return (y & (~(!s) + 1)) | (z & (~s + 1));
 }
+
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
  *   Example: isLessOrEqual(4,5) = 1.
