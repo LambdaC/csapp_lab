@@ -180,11 +180,11 @@ int isTmax(int x) {
  */
 int allOddBits(int x) {
   int num = 0xAA;
-  num << 8;
+  num = num << 8;
   num = num + 0xAA;
-  num << 8;
-  num = num + 0xAA;
-  num << 8;
+  num = num << 8;
+  num = num = num + 0xAA;
+  num = num << 8;
   num = num + 0xAA;
   return !((x & num) ^ num);
 }
