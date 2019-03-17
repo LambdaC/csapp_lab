@@ -209,7 +209,12 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  int negative_min = (~0x30) + 1;
+  int negative_x = (~x) + 1;
+  int min = x + negative_min; // equal x - 0x30
+  int max = 0x39 + negative_x; // equal 0x39 - max
+  int r = !((min >> 31) & 1) & !((max >> 31) & 1);
+  return r;
 }
 /* 
  * conditional - same as x ? y : z 
