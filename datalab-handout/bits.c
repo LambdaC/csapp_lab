@@ -237,11 +237,13 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
+  // 基本思路是判断sign的优先级最高
+  // sign相同则x-y,然后根据结果的sign来决定返回值
   int x_sign = (x >> 31) & 1;
   int y_sign = (y >> 31) & 1;
   int negative_y = (~y) + 1;
   int sum = x + negative_y;
-  return ((x_sign & 1) & (x_sign ^ y_sign)) | (!sum) | ((sum >> 31) & 1);
+  return (((x_sign & 1) & (x_sign ^ y_sign)) | (!sum) | ((sum >> 31) & 1)) & !((y_sign & 1) & (x_sign ^ y_sign));
 }
 //4
 /* 
