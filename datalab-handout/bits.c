@@ -255,7 +255,10 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  return 2;
+  // 如果x是0,对x进行取反后仍是0,sign不会变
+  // 如果x不是0, 对x进行进行取反后, 符合位相反, 这是解题关键
+  // 两符号位计算不能使用^，只能使用|, 用Tmin去代入检查就知道了。
+  return (((x >> 31) & 1) | ((((~x) + 1) >> 31) & 1)) ^ 1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
