@@ -237,7 +237,9 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int negative_y = (~y) + 1;
+  int sum = x + negative_y;
+  return !sum | (sum >> 31 & 1);
 }
 //4
 /* 
