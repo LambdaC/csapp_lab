@@ -239,7 +239,7 @@ int conditional(int x, int y, int z) {
 int isLessOrEqual(int x, int y) {
   int negative_y = (~y) + 1;
   int sum = x + negative_y;
-  return !sum | (sum >> 31 & 1);
+  return (!sum) | (sum >> 31 & 1);
 }
 //4
 /* 
