@@ -168,7 +168,7 @@ int tmin(void) {
  */
 int isTmax(int x) {
   int y = x + 1;
-  return !(~(y | x)) & !(!y | !x);
+  return !(~(y ^ x)) & !(!y | !x);
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
