@@ -167,6 +167,15 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
+  // Tmax + 1 = Tmin, and their all bits are opposite.
+  // if x is Tmax, !(~(y ^ x)) is equal to 1.
+  // -1 + 1 = 0, and also their all bits are opppsite.
+  // if x is -1, !(~(y ^ x)) is also equal to 1.
+  // other number has no this property.
+  // !Tmax, !Tmin and !-1 all equal to 0, !0 equal to 1.
+  // if X is Tmax, !(!x | !y) is equal to 1.
+  // if x is -1, !(!x | !y) is equal to 0.
+  // problem solved.
   int y = x + 1;
   return !(~(y ^ x)) & !(!y | !x);
 }
@@ -179,6 +188,7 @@ int isTmax(int x) {
  *   Rating: 2
  */
 int allOddBits(int x) {
+  // The solution is very obvious.
   int num = 0xAA;
   num = num << 8;
   num = num + 0xAA;
@@ -196,6 +206,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
+  // Very obvious.
   return (~x) + 1;
 }
 //3
@@ -209,6 +220,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
+  // if 0x30 <= x <= 0x39, x must satisy x +(-0x30) >= 0 and 0x39 + (-x) > = 0;
+  // cal x + (-0x30) and 0x39 + (-x), if both result's MSB is equal to 0,
+  // then x is satisfied.
   int negative_min = (~0x30) + 1;
   int negative_x = (~x) + 1;
   int min = x + negative_min; // equal x - 0x30
@@ -224,7 +238,7 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  // 相当于MUX的实现
+  // MUX's implementation
   int s = !x; // s equal 0(output y) or 1(output z)
   return (y & (~(!s) + 1)) | (z & (~s + 1));
 }
@@ -237,9 +251,6 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  // 基本思路是判断sign的优先级最高
-  // sign相同则x-y,然后根据结果的sign来决定返回值
-  int x_sign = (x >> 31) & 1;
   int y_sign = (y >> 31) & 1;
   int negative_y = (~y) + 1;
   int sum = x + negative_y;
@@ -321,3 +332,6 @@ int floatFloat2Int(unsigned uf) {
 unsigned floatPower2(int x) {
     return 2;
 }
+/* 
+ * CS:APP Data Lab 
+ * 
