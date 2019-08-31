@@ -251,10 +251,17 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
+  // first check the sign.
+  // second if the sign is equal, then cal the x + (-y), and check the sign.
+  int x_sign = (x >> 31) & 1;
   int y_sign = (y >> 31) & 1;
   int negative_y = (~y) + 1;
   int sum = x + negative_y;
-  return (((x_sign & 1) & (x_sign ^ y_sign)) | (!sum) | ((sum >> 31) & 1)) & !((y_sign & 1) & (x_sign ^ y_sign));
+  // if the sign is not equal, use the former part, if the sign is equal, use the later part.
+  return ((x_sign ^ y_sign) & x_sign)                                  // sign is not equal
+         | ((!(x_sign ^ y_sign))                                       // sign is equal 
+                               & ((!sum)                               // sum is 0
+                                 | ((!!sum) & (sum >> 31 & 1))));      // sum is not 0, then cal the sign bit
 }
 //4
 /* 
@@ -266,9 +273,10 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  // 如果x是0,对x进行取反后仍是0,sign不会变
-  // 如果x不是0, 对x进行进行取反后, 符合位相反, 这是解题关键
-  // 两符号位计算不能使用^，只能使用|, 用Tmin去代入检查就知道了。
+  // negative 0 or Tmin, it will get themself, thus their sign not change.
+  // negative other number will change their sign.
+  // 0'sign is 0, Tmin's sign is 1.
+  // if x is 0, then (x'sign | ~x'sign) is 0, otherwise is 1.
   return (((x >> 31) & 1) | ((((~x) + 1) >> 31) & 1)) ^ 1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -284,7 +292,62 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  // use absolute value to do it, all numbers work include Tmin, but except 0;
+  int sign = (x >> 31) & 1;
+  // sign?~x+1:x
+  int abs_x = ((~(!sign) + 1) & x) | ((~sign + 1) & (~x + 1));
+  // cal 0xffff0000 and 0x0000ffff
+  int e = 16;
+  int f = 0;
+  int num2 = (0xff << 8) + 0xff;
+  int num1 = num2 << e;
+  int a = ~(!(abs_x & num1)) + 1;
+  int b = ~(!(abs_x & num2)) + 1;
+  int k = (a & e) |
+	  (((!a) & (b & f)));
+  abs_x = abs_x >> k;
+
+  // 0xf000, 0x0f00, 0x00f0, 0x000f
+  e = 12;
+  f = 8;
+  int g = 4;
+  int h = 0;
+  num1 = 0xf << e;
+  num2 = 0xf << f;
+  int num3 = 0xf0;
+  int num4 = 0xf;
+  a = ~(!(abs_x & num1)) + 1;
+  b = ~(!(abs_x & num2)) + 1;
+  a = ~(!(abs_x & num1)) + 1;
+  b = ~(!(abs_x & num2)) + 1;
+  int c = ~(!(abs_x & num3)) + 1;
+  int d = ~(!(abs_x & num4)) + 1;
+  int i = (a & e) |
+	  (((!a) & (b & f)) |
+                  (((!b) & (c & g)) |
+                          ((!c) & (d & h))));
+  abs_x = abs_x >> i;
+
+  // 0x8, 0x4, 0x2, 0x1
+  e = 4;
+  f = 3;
+  g = 2;
+  h = 1;
+  num1 = 0x8;
+  num2 = 0x4;
+  num3 = 0x2;
+  num4 = 0x1;
+  a = ~(!(abs_x & num1)) + 1;
+  b = ~(!(abs_x & num2)) + 1;
+  c = ~(!(abs_x & num3)) + 1;
+  d = ~(!(abs_x & num4)) + 1;
+  int j = (a & e) |
+	  (((!a) & (b & f)) |
+                  (((!b) & (c & g)) |
+                          ((!c) & (d & h))));
+  // !x ? 1 : (i + j + k)
+  int result = (((~(!x) + 1)) & 1) | ((~(!!x) + 1) & (i + j + k));
+  return result;
 }
 //float
 /* 
@@ -334,4 +397,4 @@ unsigned floatPower2(int x) {
 }
 /* 
  * CS:APP Data Lab 
- * 
+ */ 
