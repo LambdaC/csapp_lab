@@ -292,24 +292,27 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  // use absolute value can't deal with leading 11110xxxx format.
-  // thus use negative value to do it, all numbers work except 0
+  // if x is postive, find the first 1's pos, then return pos+1
+  // if x is negative, ~x, find the first 1's pos, then return pos+1
   // int x_sign = (x >> 31) & 1;
   // sign?~x+1:x
   //int abs_x = ((~x_sign + 1) & (~x + 1)) | ((~(!x_sign) + 1) & x) ;
-  int y = x >> 31;
-  int abs_x = (x + y) ^ y;
-  int neg_x = ~abs_x + 1;
+  //int y = x >> 31;
+  //int abs_x = (x + y) ^ y;
+  //int neg_x = ~abs_x + 1;
+  int x_sign = (x >> 31) & 1;
+  // x_sign?~x:x
+  x = ((~x_sign + 1) & (~x)) | ((~(!x_sign) + 1) & x);
   // cal 0xffff0000 and 0x0000ffff
   int e = 16;
   int f = 0;
   int num2 = (0xff << 8) + 0xff;
   int num1 = num2 << e;
-  int a = ~(!!(~neg_x & num1)) + 1;
-  int b = ~(!!(~neg_x & num2)) + 1;
+  int a = ~(!!(x & num1)) + 1;
+  int b = ~(!!(x & num2)) + 1;
   int k = (a & e) |
     ((~a) & (b & f));
-  neg_x = neg_x >> k;
+  x = x >> k;
 
   // 0xf000, 0x0f00, 0x00f0, 0x000f
   e = 12;
@@ -320,15 +323,15 @@ int howManyBits(int x) {
   num2 = 0xf << f;
   int num3 = 0xf0;
   int num4 = 0xf;
-  a = ~(!!(~neg_x & num1)) + 1;
-  b = ~(!!(~neg_x & num2)) + 1;
-  int c = ~(!!(~neg_x & num3)) + 1;
-  int d = ~(!!(~neg_x & num4)) + 1;
+  a = ~(!!(x & num1)) + 1;
+  b = ~(!!(x & num2)) + 1;
+  int c = ~(!!(x & num3)) + 1;
+  int d = ~(!!(x & num4)) + 1;
   int i = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
       ((~c) & (d & h))))));
-  neg_x = neg_x >> i;
+  x = x >> i;
 
   // 0x8, 0x4, 0x2, 0x1
   e = 4;
@@ -339,18 +342,15 @@ int howManyBits(int x) {
   num2 = 0x4;
   num3 = 0x2;
   num4 = 0x1;
-  a = ~(!!(~neg_x & num1)) + 1;
-  b = ~(!!(~neg_x & num2)) + 1;
-  c = ~(!!(~neg_x & num3)) + 1;
-  d = ~(!!(~neg_x & num4)) + 1;
+  a = ~(!!(x & num1)) + 1;
+  b = ~(!!(x & num2)) + 1;
+  c = ~(!!(x & num3)) + 1;
+  d = ~(!!(x & num4)) + 1;
   int j = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
       ((~c) & (d & h))))));
   int result = i + j + k + 1;
-  // deal with 0
-  // !x ? 1 : result
-  result = ((~(!x) + 1) & 1) | ((~(!!x) + 1) & result);
   return result;
 }
 //float
