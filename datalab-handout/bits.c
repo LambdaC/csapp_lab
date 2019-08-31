@@ -303,16 +303,21 @@ int howManyBits(int x) {
   int a,b,c,d,e,f,g,h,i,j,k;
   int num1,num2,num3,num4;
   int result;
-  int x_sign = (x >> 31) & 1;
+  int x_sign = (x >> 31);
   // x_sign?~x:x
-  x = ((~x_sign + 1) & (~x)) | ((~(!x_sign) + 1) & x);
+  x = (x_sign & (~x)) | (~x_sign & x);
   // cal 0xffff0000 and 0x0000ffff
   e = 16;
   f = 0;
   num2 = (0xff << 8) + 0xff;
   num1 = num2 << e;
-  a = ~(!!(x & num1)) + 1;
-  b = ~(!!(x & num2)) + 1;
+  // a = ~(!!(x & num1)) + 1;
+  // b = ~(!!(x & num2)) + 1;
+  // optimize
+  // 0x0 + (-1) ==> 0x0 + (~0) ==> 0xffffffff
+  // 0x1 + (-1) ==> 0x1 + (~0) ==> 0x00000000
+  a = !(x & num1) + (~0);
+  b = !(x & num2) + (~0);
   k = (a & e) |
     ((~a) & (b & f));
   x = x >> k;
@@ -326,10 +331,17 @@ int howManyBits(int x) {
   num2 = 0xf << f;
   num3 = 0xf0;
   num4 = 0xf;
-  a = ~(!!(x & num1)) + 1;
-  b = ~(!!(x & num2)) + 1;
-  c = ~(!!(x & num3)) + 1;
-  d = ~(!!(x & num4)) + 1;
+  // a = ~(!!(x & num1)) + 1;
+  // b = ~(!!(x & num2)) + 1;
+  // c = ~(!!(x & num3)) + 1;
+  // d = ~(!!(x & num4)) + 1;
+  // optimize
+  // 0x0 + (-1) ==> 0x0 + (~0) ==> 0xffffffff
+  // 0x1 + (-1) ==> 0x1 + (~0) ==> 0x00000000
+  a = !(x & num1) + (~0);
+  b = !(x & num2) + (~0);
+  c = !(x & num3) + (~0);
+  d = !(x & num4) + (~0);
   i = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
@@ -345,10 +357,17 @@ int howManyBits(int x) {
   num2 = 0x4;
   num3 = 0x2;
   num4 = 0x1;
-  a = ~(!!(x & num1)) + 1;
-  b = ~(!!(x & num2)) + 1;
-  c = ~(!!(x & num3)) + 1;
-  d = ~(!!(x & num4)) + 1;
+  // a = ~(!!(x & num1)) + 1;
+  // b = ~(!!(x & num2)) + 1;
+  // c = ~(!!(x & num3)) + 1;
+  // d = ~(!!(x & num4)) + 1;
+  // optimize
+  // 0x0 + (-1) ==> 0x0 + (~0) ==> 0xffffffff
+  // 0x1 + (-1) ==> 0x1 + (~0) ==> 0x00000000
+  a = !(x & num1) + (~0);
+  b = !(x & num2) + (~0);
+  c = !(x & num3) + (~0);
+  d = !(x & num4) + (~0);
   j = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
