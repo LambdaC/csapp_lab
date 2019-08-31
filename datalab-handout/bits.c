@@ -466,7 +466,18 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+  int exp = 0x7F;
+  if (x == 0) {
+    return 0x3F800000;
+  }
+  exp = exp + x;
+  if (exp >= 0xFF) {
+    return 0x7F800000;
+  }
+  if (exp <= 0x00) {
+    return 0;
+  }
+  return exp << 23;
 }
 /* 
  * CS:APP Data Lab 
