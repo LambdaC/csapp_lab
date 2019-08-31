@@ -422,14 +422,35 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  unsigned exp = 1 << 23;
-  unsigned result = uf + exp;
-  unsigned sign = (uf >> 31) << 31;
-  unsigned nan = 0xff << 23;
-  nan = sign | nan;
-  if (result == nan)
-    return uf;
-  return result;
+  unsigned exp = (uf >> 23) & 0xFF;
+  unsigned frac = uf & 0x7FFFFF;
+  unsigned sign = (uf >> 31) & 1;
+  if (exp == 0xFF) {
+    return 0x80000000;
+  }
+  else if (exp == 0) {
+    return 0;
+  }
+  else {
+    int carry;
+    int result = 1;
+    int e = exp - 0x7F;
+    if (e < 0){
+      return 0;
+    }
+    if ((!sign && e > 31) || (sign && e > 30)){
+      return 0x80000000;
+    }
+    while(e > 0) {
+      carry = ((frac << 1) & 0x800000) >> 23;
+      result = (result << 1) + carry;
+      e--;
+    }
+    if (sign) {
+      result = -result;
+    }
+    return result;
+  }
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
