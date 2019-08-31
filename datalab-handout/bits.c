@@ -300,34 +300,37 @@ int howManyBits(int x) {
   //int y = x >> 31;
   //int abs_x = (x + y) ^ y;
   //int neg_x = ~abs_x + 1;
+  int a,b,c,d,e,f,g,h,i,j,k;
+  int num1,num2,num3,num4;
+  int result;
   int x_sign = (x >> 31) & 1;
   // x_sign?~x:x
   x = ((~x_sign + 1) & (~x)) | ((~(!x_sign) + 1) & x);
   // cal 0xffff0000 and 0x0000ffff
-  int e = 16;
-  int f = 0;
-  int num2 = (0xff << 8) + 0xff;
-  int num1 = num2 << e;
-  int a = ~(!!(x & num1)) + 1;
-  int b = ~(!!(x & num2)) + 1;
-  int k = (a & e) |
+  e = 16;
+  f = 0;
+  num2 = (0xff << 8) + 0xff;
+  num1 = num2 << e;
+  a = ~(!!(x & num1)) + 1;
+  b = ~(!!(x & num2)) + 1;
+  k = (a & e) |
     ((~a) & (b & f));
   x = x >> k;
 
   // 0xf000, 0x0f00, 0x00f0, 0x000f
   e = 12;
   f = 8;
-  int g = 4;
-  int h = 0;
+  g = 4;
+  h = 0;
   num1 = 0xf << e;
   num2 = 0xf << f;
-  int num3 = 0xf0;
-  int num4 = 0xf;
+  num3 = 0xf0;
+  num4 = 0xf;
   a = ~(!!(x & num1)) + 1;
   b = ~(!!(x & num2)) + 1;
-  int c = ~(!!(x & num3)) + 1;
-  int d = ~(!!(x & num4)) + 1;
-  int i = (a & e) |
+  c = ~(!!(x & num3)) + 1;
+  d = ~(!!(x & num4)) + 1;
+  i = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
       ((~c) & (d & h))))));
@@ -346,11 +349,11 @@ int howManyBits(int x) {
   b = ~(!!(x & num2)) + 1;
   c = ~(!!(x & num3)) + 1;
   d = ~(!!(x & num4)) + 1;
-  int j = (a & e) |
+  j = (a & e) |
     ((~a) & ((b & f) |
     ((~b) & ((c & g) |
       ((~c) & (d & h))))));
-  int result = i + j + k + 1;
+  result = i + j + k + 1;
   return result;
 }
 //float
