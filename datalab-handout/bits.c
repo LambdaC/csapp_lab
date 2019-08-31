@@ -292,22 +292,24 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  // use absolute value to do it, all numbers work except -1 and Tmin;
+  // use absolute value can't deal with leading 11110xxxx format.
+  // thus use negative value to do it, all numbers work except 0
   // int x_sign = (x >> 31) & 1;
   // sign?~x+1:x
-  //int abs_x = ((~(!x_sign) + 1) & x) | ((~x_sign + 1) & (~x + 1));
+  //int abs_x = ((~x_sign + 1) & (~x + 1)) | ((~(!x_sign) + 1) & x) ;
   int y = x >> 31;
   int abs_x = (x + y) ^ y;
+  int neg_x = ~abs_x + 1;
   // cal 0xffff0000 and 0x0000ffff
   int e = 16;
   int f = 0;
   int num2 = (0xff << 8) + 0xff;
   int num1 = num2 << e;
-  int a = ~(!!(abs_x & num1)) + 1;
-  int b = ~(!!(abs_x & num2)) + 1;
+  int a = ~(!!(~neg_x & num1)) + 1;
+  int b = ~(!!(~neg_x & num2)) + 1;
   int k = (a & e) |
-    (((~a) & (b & f)));
-  abs_x = abs_x >> k;
+    ((~a) & (b & f));
+  neg_x = neg_x >> k;
 
   // 0xf000, 0x0f00, 0x00f0, 0x000f
   e = 12;
@@ -318,15 +320,15 @@ int howManyBits(int x) {
   num2 = 0xf << f;
   int num3 = 0xf0;
   int num4 = 0xf;
-  a = ~(!!(abs_x & num1)) + 1;
-  b = ~(!!(abs_x & num2)) + 1;
-  int c = ~(!!(abs_x & num3)) + 1;
-  int d = ~(!!(abs_x & num4)) + 1;
+  a = ~(!!(~neg_x & num1)) + 1;
+  b = ~(!!(~neg_x & num2)) + 1;
+  int c = ~(!!(~neg_x & num3)) + 1;
+  int d = ~(!!(~neg_x & num4)) + 1;
   int i = (a & e) |
-    (((~a) & (b & f)) |
-    (((~b) & (c & g)) |
-      ((~c) & (d & h))));
-  abs_x = abs_x >> i;
+    ((~a) & ((b & f) |
+    ((~b) & ((c & g) |
+      ((~c) & (d & h))))));
+  neg_x = neg_x >> i;
 
   // 0x8, 0x4, 0x2, 0x1
   e = 4;
@@ -337,23 +339,18 @@ int howManyBits(int x) {
   num2 = 0x4;
   num3 = 0x2;
   num4 = 0x1;
-  a = ~(!!(abs_x & num1)) + 1;
-  b = ~(!!(abs_x & num2)) + 1;
-  c = ~(!!(abs_x & num3)) + 1;
-  d = ~(!!(abs_x & num4)) + 1;
+  a = ~(!!(~neg_x & num1)) + 1;
+  b = ~(!!(~neg_x & num2)) + 1;
+  c = ~(!!(~neg_x & num3)) + 1;
+  d = ~(!!(~neg_x & num4)) + 1;
   int j = (a & e) |
-    (((~a) & (b & f)) |
-    (((~b) & (c & g)) |
-      ((~c) & (d & h))));
+    ((~a) & ((b & f) |
+    ((~b) & ((c & g) |
+      ((~c) & (d & h))))));
   int result = i + j + k + 1;
-  // deal with -1, if x is -1, then result - 1, otherwise result - 0
-  // if x is -1, !~(x) is 1, otherwise is 0.
-  int num = !(~x);
-  result = result + (~num + 1);
-  // deal with Tmin, if x is Tmin, (x & -x)'s sign is 1, otherwise 0.
-  // if x is Tmin, the result should -1.
-  int sign = ((x & (~x + 1)) >> 31) & 1;
-  result =  result + (~sign + 1);
+  // deal with 0
+  // !x ? 1 : result
+  result = ((~(!x) + 1) & 1) | ((~(!!x) + 1) & result);
   return result;
 }
 //float
