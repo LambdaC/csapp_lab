@@ -2,6 +2,7 @@ btest
 ishow
 fshow
 *.swp
+*.swo
 # Prerequisites
 *.d
 
