@@ -1,0 +1,12 @@
+Border relations with Canada have never been better.
+
+1 2 4 8 16 32
+
+1 311(0x137)
+
+7 0
+
+(each char & 0xf == 9 F E 5 6 7)
+ionefg
+
+4 3 2 1 6 5
