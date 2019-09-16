@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
             miss_count++;
 
             // check if have empty line
-            unsigned char inject_flag = 0;
+            unsigned char evict_flag = 0;
             for (int i = 0; i < E; i++)
             {
                 struct Line *line = &(set->lines[i]);
@@ -137,12 +137,12 @@ int main(int argc, char *argv[])
                     line->bit = 1;
                     line->tag = tag;
                     line->time_stamp = ++time_stamp;
-                    inject_flag = 1;
+                    evict_flag = 1;
                     break;
                 }
             }
 
-            if (!inject_flag)
+            if (!evict_flag)
             {
                 int index = 0;
                 unsigned long min = ~(0UL);
