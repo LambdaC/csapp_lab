@@ -11,6 +11,7 @@
 #include "cachelab.h"
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
+void trans(int M, int N, int A[N][M], int B[M][N]);
 
 /* 
  * transpose_submit - This is the solution transpose function that you
@@ -23,11 +24,50 @@ char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
     // M=N=32
+    if (M == 32 && N == 32)
+    {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             for (int ii = 0; ii < 8; ii++)
-                for (int jj = 0; jj < 8; jj++)
-                    B[j * 8 + jj][i * 8 + i] = A[i * 8 + i][j * 8 + jj];
+            {
+                int a0 = A[i*8 + ii][j*8 + 0];
+                int a1 = A[i*8 + ii][j*8 + 1];
+                int a2 = A[i*8 + ii][j*8 + 2];
+                int a3 = A[i*8 + ii][j*8 + 3];
+                int a4 = A[i*8 + ii][j*8 + 4];
+                int a5 = A[i*8 + ii][j*8 + 5];
+                int a6 = A[i*8 + ii][j*8 + 6];
+                int a7 = A[i*8 + ii][j*8 + 7];
+                B[j*8 + 0][i*8 + ii] = a0;
+                B[j*8 + 1][i*8 + ii] = a1;
+                B[j*8 + 2][i*8 + ii] = a2;
+                B[j*8 + 3][i*8 + ii] = a3;
+                B[j*8 + 4][i*8 + ii] = a4;
+                B[j*8 + 5][i*8 + ii] = a5;
+                B[j*8 + 6][i*8 + ii] = a6;
+                B[j*8 + 7][i*8 + ii] = a7;
+            }
+    }
+    else if(M == 64 && N == 64)
+    {
+    for (int i = 0; i < 16; i++)
+        for (int j = 0; j < 16; j++)
+            for (int ii = 0; ii < 4; ii++)
+            {
+                int a0 = A[i * 4 + ii][j * 4 + 0];
+                int a1 = A[i * 4 + ii][j * 4 + 1];
+                int a2 = A[i * 4 + ii][j * 4 + 2];
+                int a3 = A[i * 4 + ii][j * 4 + 3];
+                B[j * 4 + 0][i * 4 + ii] = a0;
+                B[j * 4 + 1][i * 4 + ii] = a1;
+                B[j * 4 + 2][i * 4 + ii] = a2;
+                B[j * 4 + 3][i * 4 + ii] = a3;
+            }
+    }
+    else
+    {
+        trans(M, N, A, B);
+    }
 }
 
 /* 
@@ -52,6 +92,36 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 
 }
 
+char trans_test_desc[] = "My Test function";
+void test_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    for(int i = 0; i < 64; i+=4)
+    for(int j = 0; j < 64; j+=4)
+    for(int ii = 0; ii < 4; ii++)
+    {
+        int a0 = A[i + ii][j + 0];
+        int a1 = A[i + ii][j + 1];
+        int a2 = A[i + ii][j + 2];
+        int a3 = A[i + ii][j + 3];
+        B[j + 0][i + ii] = a0;
+        B[j + 1][i + ii] = a1;
+        B[j + 2][i + ii] = a2;
+        B[j + 3][i + ii] = a3;
+    }
+
+    for(int j = 4; j < 64; j+=4)
+        for(int ii = 0; ii < j; ii++)
+            for(int jj = 0; jj < 4; jj++)
+                B[j + jj][ii] = A[ii][j + jj];
+
+    for(int i = 4; i < 64; i+=4)
+       for(int j = 0; j < i; j+=4)
+       for(int ii = 0; ii < 4; ii++)
+            for(int jj = 0; jj < 4; jj++)
+                B[jj + j][i + ii] = A[i + ii][jj + j];
+}
+
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -66,6 +136,8 @@ void registerFunctions()
 
     /* Register any additional transpose functions */
     registerTransFunction(trans, trans_desc); 
+
+    registerTransFunction(test_trans, trans_test_desc); 
 
 }
 
