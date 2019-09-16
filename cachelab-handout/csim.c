@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <math.h>
-#include <time.h>
 
 struct Line {
    unsigned char bit;
@@ -22,9 +21,11 @@ void exit_exe();
 int main(int argc, char *argv[])
 {
     int s, E, b;
+    int p_flag = 0;
     char *file_name = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "s:E:b:t:")) != -1)
+    unsigned long time_stamp = 0;
+    while ((opt = getopt(argc, argv, "s:E:b:t:v")) != -1)
     {
         switch (opt)
         {
@@ -39,6 +40,9 @@ int main(int argc, char *argv[])
                 break;
             case 't':
                 file_name = optarg;
+                break;
+            case 'v':
+                p_flag = 1;
                 break;
             default:
                 exit_exe();
@@ -70,7 +74,7 @@ int main(int argc, char *argv[])
        for(int j = 0; j < E; j++)
        {
            lines[j].bit = 0;
-           lines[j].time_stamp = (unsigned long)time(NULL);
+           lines[j].time_stamp = 0;
        }
        sets[i].lines = lines;
     }
@@ -78,18 +82,19 @@ int main(int argc, char *argv[])
     //printf("%d\n", sets[0].line_nums); 
 
     char op[2];
-    unsigned address;
+    unsigned long address;
     char place_holder;
     int size;
 
     int hit_count = 0, miss_count = 0, evict_count = 0; 
 
-    while(fscanf(p_file, "%s %x %c %d", op, &address, &place_holder, &size) > 0)
+    while(fscanf(p_file, "%s %lx %c %d", op, &address, &place_holder, &size) > 0)
     {
         char c = op[0];
         if (c != 'L' && c != 'S' && c != 'M')
             continue;
-        printf("%s %x,%d ", op, address, size);
+        if(p_flag)
+            printf("%s %lx,%d ", op, address, size);
 
         int loop = c == 'M'?2:1;
         while(loop--){
@@ -102,11 +107,13 @@ int main(int argc, char *argv[])
         unsigned char miss_flag = 1;
         for(int i = 0; i < E; i++)
         {
-           struct Line line = set->lines[i];
-           if(line.bit == 1 && line.tag == tag)
+           struct Line *line = &(set->lines[i]);
+           if(line->bit == 1 && line->tag == tag)
            {
                hit_count++;
-               printf("hit ");
+               line->time_stamp = ++time_stamp;
+               if(p_flag)
+                   printf("hit ");
                miss_flag = 0;
                break;
            }
@@ -116,7 +123,8 @@ int main(int argc, char *argv[])
         {
             continue;
         }
-        printf("miss ");
+        if(p_flag)
+            printf("miss ");
         miss_count++;
         
         // check if have empty line
@@ -128,6 +136,7 @@ int main(int argc, char *argv[])
             {
                 line->bit = 1;
                 line->tag = tag;
+                line->time_stamp = ++time_stamp;
                 inject_flag = 1;
                 break;
             }
@@ -139,7 +148,7 @@ int main(int argc, char *argv[])
             unsigned long min = ~(0UL);
             for(int i = 0; i < E; i++)
             {
-                unsigned long time_stamp = set->lines[i].time_stamp;
+                unsigned long time_stamp = (set->lines[i]).time_stamp;
                 if(time_stamp < min)
                 {
                     index = i;
@@ -147,12 +156,14 @@ int main(int argc, char *argv[])
                 }
             }
             set->lines[index].tag = tag;
-            set->lines[index].time_stamp = (unsigned long)time(NULL);
+            set->lines[index].time_stamp = ++time_stamp;
             evict_count++;
-            printf("eviction ");
+            if(p_flag)
+                printf("eviction ");
         }
         }
-        printf("\n");
+        if(p_flag)
+            printf("\n");
     }
 
     fclose(p_file);
