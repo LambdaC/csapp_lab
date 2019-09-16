@@ -95,14 +95,15 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 char trans_test_desc[] = "My Test function";
 void test_trans(int M, int N, int A[N][M], int B[M][N])
 {
+    int a0, a1, a2, a3;
     for(int i = 0; i < 64; i+=4)
     for(int j = 0; j < 64; j+=4)
     for(int ii = 0; ii < 4; ii++)
     {
-        int a0 = A[i + ii][j + 0];
-        int a1 = A[i + ii][j + 1];
-        int a2 = A[i + ii][j + 2];
-        int a3 = A[i + ii][j + 3];
+        a0 = A[i + ii][j + 0];
+        a1 = A[i + ii][j + 1];
+        a2 = A[i + ii][j + 2];
+        a3 = A[i + ii][j + 3];
         B[j + 0][i + ii] = a0;
         B[j + 1][i + ii] = a1;
         B[j + 2][i + ii] = a2;
@@ -111,14 +112,30 @@ void test_trans(int M, int N, int A[N][M], int B[M][N])
 
     for(int j = 4; j < 64; j+=4)
         for(int ii = 0; ii < j; ii++)
-            for(int jj = 0; jj < 4; jj++)
-                B[j + jj][ii] = A[ii][j + jj];
+        {
+            a0 = A[ii][j + 0];
+            a1 = A[ii][j + 1];
+            a2 = A[ii][j + 2];
+            a3 = A[ii][j + 3];
+            B[j + 0][ii] = a0;
+            B[j + 1][ii] = a1;
+            B[j + 2][ii] = a2;
+            B[j + 3][ii] = a3;
+        }
 
     for(int i = 4; i < 64; i+=4)
        for(int j = 0; j < i; j+=4)
        for(int ii = 0; ii < 4; ii++)
-            for(int jj = 0; jj < 4; jj++)
-                B[jj + j][i + ii] = A[i + ii][jj + j];
+       {
+           a0 = A[i+ii][j + 0];
+           a1 = A[i+ii][j + 1];
+           a2 = A[i+ii][j + 2];
+           a3 = A[i+ii][j + 3];
+           B[j + 0][i + ii] = a0;
+           B[j + 1][i + ii] = a1;
+           B[j + 2][i + ii] = a2;
+           B[j + 3][i + ii] = a3;
+       }
 }
 
 
