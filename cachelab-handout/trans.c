@@ -12,6 +12,8 @@
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 void trans(int M, int N, int A[N][M], int B[M][N]);
+void test0_trans(int M, int N, int A[N][M], int B[M][N]);
+void test1_trans(int M, int N, int A[N][M], int B[M][N]);
 
 /* 
  * transpose_submit - This is the solution transpose function that you
@@ -26,43 +28,11 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     // M=N=32
     if (M == 32 && N == 32)
     {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            for (int ii = 0; ii < 8; ii++)
-            {
-                int a0 = A[i*8 + ii][j*8 + 0];
-                int a1 = A[i*8 + ii][j*8 + 1];
-                int a2 = A[i*8 + ii][j*8 + 2];
-                int a3 = A[i*8 + ii][j*8 + 3];
-                int a4 = A[i*8 + ii][j*8 + 4];
-                int a5 = A[i*8 + ii][j*8 + 5];
-                int a6 = A[i*8 + ii][j*8 + 6];
-                int a7 = A[i*8 + ii][j*8 + 7];
-                B[j*8 + 0][i*8 + ii] = a0;
-                B[j*8 + 1][i*8 + ii] = a1;
-                B[j*8 + 2][i*8 + ii] = a2;
-                B[j*8 + 3][i*8 + ii] = a3;
-                B[j*8 + 4][i*8 + ii] = a4;
-                B[j*8 + 5][i*8 + ii] = a5;
-                B[j*8 + 6][i*8 + ii] = a6;
-                B[j*8 + 7][i*8 + ii] = a7;
-            }
+        test0_trans(M, N, A, B);
     }
     else if(M == 64 && N == 64)
     {
-    for (int i = 0; i < 16; i++)
-        for (int j = 0; j < 16; j++)
-            for (int ii = 0; ii < 4; ii++)
-            {
-                int a0 = A[i * 4 + ii][j * 4 + 0];
-                int a1 = A[i * 4 + ii][j * 4 + 1];
-                int a2 = A[i * 4 + ii][j * 4 + 2];
-                int a3 = A[i * 4 + ii][j * 4 + 3];
-                B[j * 4 + 0][i * 4 + ii] = a0;
-                B[j * 4 + 1][i * 4 + ii] = a1;
-                B[j * 4 + 2][i * 4 + ii] = a2;
-                B[j * 4 + 3][i * 4 + ii] = a3;
-            }
+        test1_trans(M, N, A, B);
     }
     else
     {
@@ -92,22 +62,112 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 
 }
 
-char trans_test_desc[] = "My Test function";
-void test_trans(int M, int N, int A[N][M], int B[M][N])
+char trans_test0_desc[] = "32 X 32 Matrix Test";
+void test0_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            for (int ii = 0; ii < 8; ii++)
+            {
+                int a0 = A[i*8 + ii][j*8 + 0];
+                int a1 = A[i*8 + ii][j*8 + 1];
+                int a2 = A[i*8 + ii][j*8 + 2];
+                int a3 = A[i*8 + ii][j*8 + 3];
+                int a4 = A[i*8 + ii][j*8 + 4];
+                int a5 = A[i*8 + ii][j*8 + 5];
+                int a6 = A[i*8 + ii][j*8 + 6];
+                int a7 = A[i*8 + ii][j*8 + 7];
+                B[j*8 + 0][i*8 + ii] = a0;
+                B[j*8 + 1][i*8 + ii] = a1;
+                B[j*8 + 2][i*8 + ii] = a2;
+                B[j*8 + 3][i*8 + ii] = a3;
+                B[j*8 + 4][i*8 + ii] = a4;
+                B[j*8 + 5][i*8 + ii] = a5;
+                B[j*8 + 6][i*8 + ii] = a6;
+                B[j*8 + 7][i*8 + ii] = a7;
+             }
+}
+
+char trans_test1_desc[] = "64 X 64 Matrix Test1";
+void test1_trans(int M, int N, int A[N][M], int B[M][N])
 {
     int a0, a1, a2, a3;
-    for(int i = 0; i < 64; i+=4)
-    for(int j = 0; j < 64; j+=4)
-    for(int ii = 0; ii < 4; ii++)
+    int a4, a5, a6, a7;
+    int a8, a9, a10, a11;
+        for (int j = 0; j < 16; j++)
+          for (int i = 0; i < 16; i++)
+            {
+                a0 = A[i * 4][j * 4 + 0];
+                a1 = A[i * 4][j * 4 + 1];
+                a2 = A[i * 4][j * 4 + 2];
+                a3 = A[i * 4][j * 4 + 3];
+
+                a4 = A[i * 4 + 1][j*4+0];
+                a5 = A[i * 4 + 1][j*4+1];
+                a6 = A[i * 4 + 1][j*4+2];
+                a7 = A[i * 4 + 1][j*4+3];
+
+                a8 = A[i*4+2][j*4+0];
+                a9 = A[i*4+2][j*4+1];
+                a10 = A[i*4+2][j*4+2];
+                a11 = A[i*4+2][j*4+3];
+
+                B[j * 4 + 0][i * 4] = a0;
+                B[j * 4 + 1][i * 4] = a1;
+                B[j * 4 + 2][i * 4] = a2;
+                B[j * 4 + 3][i * 4] = a3;
+
+                B[j * 4 + 0][i * 4+ 1] = a4;
+                B[j * 4 + 1][i * 4+ 1] = a5;
+                B[j * 4 + 2][i * 4+ 1] = a6;
+                B[j * 4 + 3][i * 4+ 1] = a7;
+
+                B[j*4 + 0][i*4+2] = a8;
+                B[j*4 + 1][i*4+2] = a9;
+                B[j*4 + 2][i*4+2] = a10;
+                B[j*4 + 3][i*4+2] = a11;
+
+                a0 = A[i*4+3][j*4+0];
+                a1 = A[i*4+3][j*4+1];
+                a2 = A[i*4+3][j*4+2];
+                a3 = A[i*4+3][j*4+3];
+
+                B[j*4+0][i*4+3] = a0;
+                B[j*4+1][i*4+3] = a1;
+                B[j*4+2][i*4+3] = a2;
+                B[j*4+3][i*4+3] = a3;
+
+            }
+}
+
+char trans_test2_desc[] = "64 X 64 Matrix Test2";
+void test2_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    int a0, a1, a2, a3;
+    int a4, a5, a6, a7;
+    for(int i = 0, j = 0; i < 64 && j < 64; i+=4, j+=4)
+    for(int ii = 0; ii < 4; ii+=2)
     {
         a0 = A[i + ii][j + 0];
         a1 = A[i + ii][j + 1];
         a2 = A[i + ii][j + 2];
         a3 = A[i + ii][j + 3];
+
+        a4 = A[i + ii+1][j+0];
+        a5 = A[i + ii+1][j+1];
+        a6 = A[i + ii+1][j+2];
+        a7 = A[i + ii+1][j+3];
+
         B[j + 0][i + ii] = a0;
         B[j + 1][i + ii] = a1;
         B[j + 2][i + ii] = a2;
         B[j + 3][i + ii] = a3;
+
+        B[j + 0][i + ii+1] = a4;
+        B[j + 1][i + ii+1] = a5;
+        B[j + 2][i + ii+1] = a6;
+        B[j + 3][i + ii+1] = a7;
     }
 
     for(int j = 4; j < 64; j+=4)
@@ -125,19 +185,154 @@ void test_trans(int M, int N, int A[N][M], int B[M][N])
 
     for(int i = 4; i < 64; i+=4)
        for(int j = 0; j < i; j+=4)
-       for(int ii = 0; ii < 4; ii++)
+       for(int ii = 0; ii < 4; ii+=2)
        {
            a0 = A[i+ii][j + 0];
            a1 = A[i+ii][j + 1];
            a2 = A[i+ii][j + 2];
            a3 = A[i+ii][j + 3];
+
+           a4 = A[i+ii+1][j+0];
+           a5 = A[i+ii+1][j+1];
+           a6 = A[i+ii+1][j+2];
+           a7 = A[i+ii+1][j+3];
+
            B[j + 0][i + ii] = a0;
            B[j + 1][i + ii] = a1;
            B[j + 2][i + ii] = a2;
            B[j + 3][i + ii] = a3;
+
+           B[j + 0][i + ii + 1]=a4;
+           B[j + 1][i + ii + 1]=a5;
+           B[j + 2][i + ii + 1]=a6;
+           B[j + 3][i + ii + 1]=a7;
        }
 }
 
+char trans_test3_desc[] = "64 X 64 Matrix Test3";
+void test3_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    int a0, a1, a2, a3;
+    int a4, a5, a6, a7;
+    int a8, a9, a10, a11;
+          for (int i = 0; i < 64; i+=8)
+            for (int j = 0; j < 64; j+=4)
+             /*
+              while(i == j || i == (j-4))
+              {
+                 if(i == j){
+                 for(int ii = 0; i < 4; ii+=2)
+                 {
+                  a0 = A[i + ii][j + 0];
+                  a1 = A[i + ii][j + 1];
+                  a2 = A[i + ii][j + 2];
+                  a3 = A[i + ii][j + 3];
+
+                  if(ii == 0)
+                  {
+                       a8 = A[i + ii][j + 4];
+                       a9 = A[i + ii][j + 5];
+                       a10 = A[i + ii][j + 6];
+                       a11 = A[i + ii][j + 7];
+                  }
+
+                  a4 = A[i + ii + 1][j + 0];
+                  a5 = A[i + ii + 1][j + 1];
+                  a6 = A[i + ii + 1][j + 2];
+                  a7 = A[i + ii + 1][j + 3];
+                  
+    
+                  B[j + 0][i + ii] = a0;
+                  B[j + 1][i + ii] = a1;
+                  B[j + 2][i + ii] = a2;
+                  B[j + 3][i + ii] = a3;
+
+                  B[j + 0][i + ii + 1] = a4;
+                  B[j + 1][i + ii + 1] = a5;
+                  B[j + 2][i + ii + 1] = a6;
+                  B[j + 3][i + ii + 1] = a7;
+                 }
+                 }else{
+                     B[j + 0][i+ii] = a8;
+                     B[j + 1][i+ii] = a9;
+                     B[j + 2][i+ii] = a10;
+                     B[j + 3][i+ii] = a11;
+
+                     
+                     a0 = A[i + ii + 1][j + 0];
+                     a1 = A[i + ii + 1][j + 1];
+                     a2 = A[i + ii + 1][j + 2];
+                     a3 = A[i + ii + 1][j + 3];
+                    a4 = A[i + ii + 2][j + 0];
+                    a5 = A[i + ii + 2][j + 1];
+                  a6 = A[i + ii + 2][j + 2];
+                  a7 = A[i + ii + 2][j + 3];
+                       a8 = A[i + ii+3][j + 0];
+                       a9 = A[i + ii+3][j + 1];
+                       a10 = A[i + ii+3][j + 2];
+                       a11 = A[i + ii+3][j + 3];
+
+                       B[j + 0][i+ii+1]=a0;
+                       B[j + 1][i+ii+1]=a1;
+                       B[j + 2][i+ii+1]=a2;
+                       B[j + 3][i+ii+1]=a3;
+                       B[j + 0][i+ii+1]=a4;
+                       B[j + 1][i+ii+2]=a5;
+                       B[j + 2][i+ii+2]=a6;
+                       B[j + 3][i+ii+2]=a7;
+                       B[j + 0][i+ii+3]=a8;
+                       B[j + 1][i+ii+3]=a9;
+                       B[j + 2][i+ii+3]=a10;
+                       B[j + 3][i+ii+3]=a11;
+
+                 }
+                 j+=4;
+              }
+               */
+              for(int ii = 0; ii < 8; ii+=4)
+              {
+                  a0 = A[i + ii][j + 0];
+                  a1 = A[i + ii][j + 1];
+                  a2 = A[i + ii][j + 2];
+                  a3 = A[i + ii][j + 3];
+
+                  a4 = A[i + ii + 1][j + 0];
+                  a5 = A[i + ii + 1][j + 1];
+                  a6 = A[i + ii + 1][j + 2];
+                  a7 = A[i + ii + 1][j + 3];
+
+                  a8 = A[i+ii+2][j+0];
+                  a9 = A[i+ii+2][j+1];
+                  a10 = A[i+ii+2][j+2];
+                  a11 = A[i+ii+2][j+3];
+
+                  B[j + 0][i + ii] = a0;
+                  B[j + 1][i + ii] = a1;
+                  B[j + 2][i + ii] = a2;
+                  B[j + 3][i + ii] = a3;
+
+                  B[j + 0][i + ii + 1] = a4;
+                  B[j + 1][i + ii + 1] = a5;
+                  B[j + 2][i + ii + 1] = a6;
+                  B[j + 3][i + ii + 1] = a7;
+
+                  B[j + 0][i + ii + 2] = a8;
+                  B[j + 1][i + ii + 2] = a9;
+                  B[j + 2][i + ii + 2] = a10;
+                  B[j + 3][i + ii + 2] = a11;
+
+                  a0 = A[i + ii + 3][j + 0];
+                  a1 = A[i + ii + 3][j + 1];
+                  a2 = A[i + ii + 3][j + 2];
+                  a3 = A[i + ii + 3][j + 3];
+
+                  B[j + 0][i + ii + 3] = a0;
+                  B[j + 1][i + ii + 3] = a1;
+                  B[j + 2][i + ii + 3] = a2;
+                  B[j + 3][i + ii + 3] = a3;
+
+              }
+}
 
 /*
  * registerFunctions - This function registers your transpose
@@ -152,10 +347,13 @@ void registerFunctions()
     registerTransFunction(transpose_submit, transpose_submit_desc); 
 
     /* Register any additional transpose functions */
-    registerTransFunction(trans, trans_desc); 
+    registerTransFunction(trans, trans_desc);
 
-    registerTransFunction(test_trans, trans_test_desc); 
+    registerTransFunction(test0_trans, trans_test0_desc); 
 
+    registerTransFunction(test2_trans, trans_test2_desc);
+
+    registerTransFunction(test3_trans, trans_test3_desc);
 }
 
 /* 
