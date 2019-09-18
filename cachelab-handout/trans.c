@@ -332,6 +332,66 @@ void test3_trans(int M, int N, int A[N][M], int B[M][N])
                 }
 }
 
+char trans_test4_desc[] = "64 X 64 Matrix Test4";
+void test4_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    int a0, a1, a2, a3;
+    int a4, a5, a6, a7;
+    for(int i = 0; i < 64; i+=8)
+        for(int j = 0; j < 64; j+=8)
+        {
+            // divided into 64 8 X 8 Blocks
+            for(int ii = 0; ii < 8; ii+=2)
+            {
+                // deal left 8 x 4 Blocks from top to bottom
+                a0 = A[i + ii][j + 0];
+                a1 = A[i + ii][j + 1];
+                a2 = A[i + ii][j + 2];
+                a3 = A[i + ii][j + 3];
+                
+                a4 = A[i + ii + 1][j + 0];
+                a5 = A[i + ii + 1][j + 1];
+                a6 = A[i + ii + 1][j + 2];
+                a7 = A[i + ii + 1][j + 3];
+                
+                B[j + 0][i + ii] = a0;
+                B[j + 1][i + ii] = a1;
+                B[j + 2][i + ii] = a2;
+                B[j + 3][i + ii] = a3;
+                
+                B[j + 0][i + ii + 1] = a4;
+                B[j + 1][i + ii + 1] = a5;
+                B[j + 2][i + ii + 1] = a6;
+                B[j + 3][i + ii + 1] = a7;
+            }
+            
+            for (int ii = 7; ii > 0; ii-=2)
+            {
+                // deal right 8 x 4 Blocks from bottom to top
+                a0 = A[i + ii][j + 0];
+                a1 = A[i + ii][j + 1];
+                a2 = A[i + ii][j + 2];
+                a3 = A[i + ii][j + 3];
+                
+                a4 = A[i + ii - 1][j + 0];
+                a5 = A[i + ii - 1][j + 1];
+                a6 = A[i + ii - 1][j + 2];
+                a7 = A[i + ii - 1][j + 3];
+                
+                B[j + 0][i + ii] = a0;
+                B[j + 1][i + ii] = a1;
+                B[j + 2][i + ii] = a2;
+                B[j + 3][i + ii] = a3;
+                
+                B[j + 0][i + ii - 1] = a4;
+                B[j + 1][i + ii - 1] = a5;
+                B[j + 2][i + ii - 1] = a6;
+                B[j + 3][i + ii - 1] = a7;
+            }
+            
+        }
+}
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -352,6 +412,8 @@ void registerFunctions()
     registerTransFunction(test2_trans, trans_test2_desc);
 
     registerTransFunction(test3_trans, trans_test3_desc);
+    
+    registerTransFunction(test4_trans, trans_test4_desc);
 }
 
 /*
