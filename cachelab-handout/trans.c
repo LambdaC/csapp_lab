@@ -14,6 +14,7 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 void trans(int M, int N, int A[N][M], int B[M][N]);
 void test0_trans(int M, int N, int A[N][M], int B[M][N]);
 void test1_trans(int M, int N, int A[N][M], int B[M][N]);
+void test4_trans(int M, int N, int A[N][M], int B[M][N]);
 
 /*
  * transpose_submit - This is the solution transpose function that you
@@ -32,7 +33,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     }
     else if (M == 64 && N == 64)
     {
-        test1_trans(M, N, A, B);
+        test4_trans(M, N, A, B);
     }
     else
     {
@@ -340,7 +341,7 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
     for(int i = 0; i < 64; i+=8)
         for(int j = 0; j < 64; j+=8)
         {
-            // divided into 64 8 X 8 Blocks
+            // divided into 8 X 8 Blocks
             for(int ii = 0; ii < 8; ii+=2)
             {
                 // deal left 8 x 4 Blocks from top to bottom
@@ -365,6 +366,8 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
                 B[j + 3][i + ii + 1] = a7;
             }
             
+            j += 4;
+
             for (int ii = 7; ii > 0; ii-=2)
             {
                 // deal right 8 x 4 Blocks from bottom to top
@@ -388,8 +391,90 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
                 B[j + 2][i + ii - 1] = a6;
                 B[j + 3][i + ii - 1] = a7;
             }
+
+            j -= 4;
             
         }
+}
+
+char trans_test8x8_desc[] = "8 X 8 Matrix Test";
+void test8x8_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    int a0, a1, a2, a3;
+    int a4, a5, a6, a7;
+    for(int i = 0; i < 64; i+=8)
+        for(int j = 0; j < 64; j+=8)
+        {
+             for(int ii = 0; ii < 4; ii++)
+             {
+                 a0 = A[i+ii][j+0];
+                 a1 = A[i+ii][j+1];
+                 a2 = A[i+ii][j+2];
+                 a3 = A[i+ii][j+3];
+                 a4 = A[i+ii][j+4];
+                 a5 = A[i+ii][j+5];
+                 a6 = A[i+ii][j+6];
+                 a7 = A[i+ii][j+7];
+
+                 B[i+ii][(j+8)%8 + 0] = a0;
+                 B[i+ii][(j+8)%8 + 1] = a1;
+                 B[i+ii][(j+8)%8 + 2] = a2;
+                 B[i+ii][(j+8)%8 + 3] = a3;
+                 B[i+ii][(j+8)%8 + 4] = a4;
+                 B[i+ii][(j+8)%8 + 5] = a5;
+                 B[i+ii][(j+8)%8 + 6] = a6;
+                 B[i+ii][(j+8)%8 + 7] = a7;
+             }
+
+             for(int ii = 4; ii < 8; ii++)
+             {
+                 a0 = A[i+ii][j+0];
+                 a1 = A[i+ii][j+1];
+                 a2 = A[i+ii][j+2];
+                 a3 = A[i+ii][j+3];
+                 a4 = A[i+ii][j+4];
+                 a5 = A[i+ii][j+5];
+                 a6 = A[i+ii][j+6];
+                 a7 = A[i+ii][j+7];
+
+                 B[i+ii][(j+16)%8 + 0] = a0;
+                 B[i+ii][(j+16)%8 + 1] = a1;
+                 B[i+ii][(j+16)%8 + 2] = a2;
+                 B[i+ii][(j+16)%8 + 3] = a3;
+                 B[i+ii][(j+16)%8 + 4] = a4;
+                 B[i+ii][(j+16)%8 + 5] = a5;
+                 B[i+ii][(j+16)%8 + 6] = a6;
+                 B[i+ii][(j+16)%8 + 7] = a7;
+             }
+
+             for(int k = j+8; k < j + 16; k+=8)
+             for(int ii = 0; ii < 4; ii++)
+             {
+                 a0 = B[i+ii][k%8 + 0];
+                 a1 = B[i+ii][k%8 + 1];
+                 a2 = B[i+ii][k%8 + 2];
+                 a3 = B[i+ii][k%8 + 3];
+
+                 B[j + 0][i+ii + (k==j+8)?0:4] = a0;
+                 B[j + 1][i+ii + (k==j+8)?0:4] = a1;
+                 B[j + 2][i+ii + (k==j+8)?0:4] = a2;
+                 B[j + 3][i+ii + (k==j+8)?0:4] = a3;
+             }
+
+             for(int k = j+12; k < j+20; k+=8)
+                 for(int ii = 0; ii < 4; ii++)
+                 {
+                     a0 = B[i+ii][k%8 + 0];
+                     a1 = B[i+ii][k%8 + 1];
+                     a2 = B[i+ii][k%8 + 2];
+                     a3 = B[i+ii][k%8 + 3];
+
+                     B[j + 4][i+ii + (k==j+12)?0:4] = a0;
+                     B[j + 5][i+ii + (k==j+12)?0:4] = a1;
+                     B[j + 6][i+ii + (k==j+12)?0:4] = a2;
+                     B[j + 7][i+ii + (k==j+12)?0:4] = a3;
+                 }
+         }
 }
 
 /*
@@ -414,6 +499,8 @@ void registerFunctions()
     registerTransFunction(test3_trans, trans_test3_desc);
     
     registerTransFunction(test4_trans, trans_test4_desc);
+
+    registerTransFunction(test8x8_trans, trans_test8x8_desc);
 }
 
 /*
