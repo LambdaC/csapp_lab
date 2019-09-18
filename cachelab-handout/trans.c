@@ -285,8 +285,8 @@ void test64x64_trans(int M, int N, int A[N][M], int B[M][N])
 char trans_test61x67_desc[] = "61 X 67 Matrix Test";
 void test61x67_trans(int M, int N, int A[N][M], int B[M][N])
 {
-    for (int i = 0; i < 56; i+=8)
         for (int j = 0; j < 56; j+=8)
+    for (int i = 0; i < 56; i+=8)
             for (int ii = 0; ii < 8; ii++)
             {
                 int a0 = A[i + ii][j + 0];
@@ -309,8 +309,8 @@ void test61x67_trans(int M, int N, int A[N][M], int B[M][N])
     for(int i = 0; i < 67;i++)
         for(int j = 56; j < 61; j++)
                 B[j][i] = A[i][j];
-    for(int i = 56; i < 67; i++)
        for(int j = 0; j < 61; j++)
+    for(int i = 56; i < 67; i++)
                B[j][i] = A[i][j];
 }
 
