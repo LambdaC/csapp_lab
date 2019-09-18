@@ -14,6 +14,7 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 void trans(int M, int N, int A[N][M], int B[M][N]);
 void test32x32_trans(int M, int N, int A[N][M], int B[M][N]);
 void test64x64_trans(int M, int N, int A[N][M], int B[M][N]);
+void test61x67_trans(int M, int N, int A[N][M], int B[M][N]);
 
 /*
  * transpose_submit - This is the solution transpose function that you
@@ -33,6 +34,10 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     else if (M == 64 && N == 64)
     {
         test64x64_trans(M, N, A, B);
+    }
+    else if (M == 61 && N == 67)
+    {
+        test61x67_trans(M, N, A, B);
     }
     else
     {
@@ -277,6 +282,38 @@ void test64x64_trans(int M, int N, int A[N][M], int B[M][N])
         }
 }
 
+char trans_test61x67_desc[] = "61 X 67 Matrix Test";
+void test61x67_trans(int M, int N, int A[N][M], int B[M][N])
+{
+    for (int i = 0; i < 56; i+=8)
+        for (int j = 0; j < 56; j+=8)
+            for (int ii = 0; ii < 8; ii++)
+            {
+                int a0 = A[i + ii][j + 0];
+                int a1 = A[i + ii][j + 1];
+                int a2 = A[i + ii][j + 2];
+                int a3 = A[i + ii][j + 3];
+                int a4 = A[i + ii][j + 4];
+                int a5 = A[i + ii][j + 5];
+                int a6 = A[i + ii][j + 6];
+                int a7 = A[i + ii][j + 7];
+                B[j + 0][i + ii] = a0;
+                B[j + 1][i + ii] = a1;
+                B[j + 2][i + ii] = a2;
+                B[j + 3][i + ii] = a3;
+                B[j + 4][i + ii] = a4;
+                B[j + 5][i + ii] = a5;
+                B[j + 6][i + ii] = a6;
+                B[j + 7][i + ii] = a7;
+            }
+    for(int i = 0; i < 67;i++)
+        for(int j = 56; j < 61; j++)
+                B[j][i] = A[i][j];
+    for(int i = 56; i < 67; i++)
+       for(int j = 0; j < 61; j++)
+               B[j][i] = A[i][j];
+}
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -295,6 +332,8 @@ void registerFunctions()
     registerTransFunction(test32x32_trans, trans_test32x32_desc);
 
     registerTransFunction(test64x64_trans, trans_test64x64_desc);
+    
+    registerTransFunction(test61x67_trans, trans_test61x67_desc);
 }
 
 /*
