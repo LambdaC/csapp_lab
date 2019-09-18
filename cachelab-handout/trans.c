@@ -417,7 +417,7 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
             if (i != j)
             {
                 // divided into 8 X 8 Blocks
-                for (int ii = 0; ii < 8; ii += 2)
+                for (int ii = 0; ii < 8; ii++)
                 {
                     // deal left 8 x 4 Blocks from top to bottom
                     a0 = A[i + ii][j + 0];
@@ -425,25 +425,23 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
                     a2 = A[i + ii][j + 2];
                     a3 = A[i + ii][j + 3];
 
-                    a4 = A[i + ii + 1][j + 0];
-                    a5 = A[i + ii + 1][j + 1];
-                    a6 = A[i + ii + 1][j + 2];
-                    a7 = A[i + ii + 1][j + 3];
+                    if(ii == 0)
+                    {
+                    a4 = A[i + ii][j + 4];
+                    a5 = A[i + ii][j + 5];
+                    a6 = A[i + ii][j + 6];
+                    a7 = A[i + ii][j + 7];
+                    }
 
                     B[j + 0][i + ii] = a0;
                     B[j + 1][i + ii] = a1;
                     B[j + 2][i + ii] = a2;
                     B[j + 3][i + ii] = a3;
-
-                    B[j + 0][i + ii + 1] = a4;
-                    B[j + 1][i + ii + 1] = a5;
-                    B[j + 2][i + ii + 1] = a6;
-                    B[j + 3][i + ii + 1] = a7;
                 }
 
                 j += 4;
 
-                for (int ii = 7; ii > 0; ii -= 2)
+                for (int ii = 7; ii > 0; ii--)
                 {
                     // deal right 8 x 4 Blocks from bottom to top
                     a0 = A[i + ii][j + 0];
@@ -451,21 +449,17 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
                     a2 = A[i + ii][j + 2];
                     a3 = A[i + ii][j + 3];
 
-                    a4 = A[i + ii - 1][j + 0];
-                    a5 = A[i + ii - 1][j + 1];
-                    a6 = A[i + ii - 1][j + 2];
-                    a7 = A[i + ii - 1][j + 3];
-
                     B[j + 0][i + ii] = a0;
                     B[j + 1][i + ii] = a1;
                     B[j + 2][i + ii] = a2;
                     B[j + 3][i + ii] = a3;
 
-                    B[j + 0][i + ii - 1] = a4;
-                    B[j + 1][i + ii - 1] = a5;
-                    B[j + 2][i + ii - 1] = a6;
-                    B[j + 3][i + ii - 1] = a7;
                 }
+                
+                B[j+0][i+0] = a4;
+                B[j+1][i+0] = a5;
+                B[j+2][i+0] = a6;
+                B[j+3][i+0] = a7;
 
                 j -= 4;
             }
