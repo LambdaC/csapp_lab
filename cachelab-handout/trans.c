@@ -338,62 +338,139 @@ void test4_trans(int M, int N, int A[N][M], int B[M][N])
 {
     int a0, a1, a2, a3;
     int a4, a5, a6, a7;
-    for(int i = 0; i < 64; i+=8)
-        for(int j = 0; j < 64; j+=8)
+    for (int i = 0; i < 64; i += 8)
+        for (int j = 0; j < 64; j += 8)
         {
-            // divided into 8 X 8 Blocks
-            for(int ii = 0; ii < 8; ii+=2)
-            {
-                // deal left 8 x 4 Blocks from top to bottom
-                a0 = A[i + ii][j + 0];
-                a1 = A[i + ii][j + 1];
-                a2 = A[i + ii][j + 2];
-                a3 = A[i + ii][j + 3];
-                
-                a4 = A[i + ii + 1][j + 0];
-                a5 = A[i + ii + 1][j + 1];
-                a6 = A[i + ii + 1][j + 2];
-                a7 = A[i + ii + 1][j + 3];
-                
-                B[j + 0][i + ii] = a0;
-                B[j + 1][i + ii] = a1;
-                B[j + 2][i + ii] = a2;
-                B[j + 3][i + ii] = a3;
-                
-                B[j + 0][i + ii + 1] = a4;
-                B[j + 1][i + ii + 1] = a5;
-                B[j + 2][i + ii + 1] = a6;
-                B[j + 3][i + ii + 1] = a7;
-            }
-            
-            j += 4;
+            if (i == j) {
+                for (int ii = 0; ii < 4; ii++)
+                {
+                    a0 = A[i + ii][j + 0];
+                    a1 = A[i + ii][j + 1];
+                    a2 = A[i + ii][j + 2];
+                    a3 = A[i + ii][j + 3];
+                    a4 = A[i + ii][j + 4];
+                    a5 = A[i + ii][j + 5];
+                    a6 = A[i + ii][j + 6];
+                    a7 = A[i + ii][j + 7];
 
-            for (int ii = 7; ii > 0; ii-=2)
-            {
-                // deal right 8 x 4 Blocks from bottom to top
-                a0 = A[i + ii][j + 0];
-                a1 = A[i + ii][j + 1];
-                a2 = A[i + ii][j + 2];
-                a3 = A[i + ii][j + 3];
-                
-                a4 = A[i + ii - 1][j + 0];
-                a5 = A[i + ii - 1][j + 1];
-                a6 = A[i + ii - 1][j + 2];
-                a7 = A[i + ii - 1][j + 3];
-                
-                B[j + 0][i + ii] = a0;
-                B[j + 1][i + ii] = a1;
-                B[j + 2][i + ii] = a2;
-                B[j + 3][i + ii] = a3;
-                
-                B[j + 0][i + ii - 1] = a4;
-                B[j + 1][i + ii - 1] = a5;
-                B[j + 2][i + ii - 1] = a6;
-                B[j + 3][i + ii - 1] = a7;
-            }
+                    B[i + ii][(j + 8) % 8 + 0] = a0;
+                    B[i + ii][(j + 8) % 8 + 1] = a1;
+                    B[i + ii][(j + 8) % 8 + 2] = a2;
+                    B[i + ii][(j + 8) % 8 + 3] = a3;
+                    B[i + ii][(j + 8) % 8 + 4] = a4;
+                    B[i + ii][(j + 8) % 8 + 5] = a5;
+                    B[i + ii][(j + 8) % 8 + 6] = a6;
+                    B[i + ii][(j + 8) % 8 + 7] = a7;
+                }
 
-            j -= 4;
-            
+                for (int ii = 4; ii < 8; ii++)
+                {
+                    a0 = A[i + ii][j + 0];
+                    a1 = A[i + ii][j + 1];
+                    a2 = A[i + ii][j + 2];
+                    a3 = A[i + ii][j + 3];
+                    a4 = A[i + ii][j + 4];
+                    a5 = A[i + ii][j + 5];
+                    a6 = A[i + ii][j + 6];
+                    a7 = A[i + ii][j + 7];
+
+                    B[i + ii][(j + 16) % 8 + 0] = a0;
+                    B[i + ii][(j + 16) % 8 + 1] = a1;
+                    B[i + ii][(j + 16) % 8 + 2] = a2;
+                    B[i + ii][(j + 16) % 8 + 3] = a3;
+                    B[i + ii][(j + 16) % 8 + 4] = a4;
+                    B[i + ii][(j + 16) % 8 + 5] = a5;
+                    B[i + ii][(j + 16) % 8 + 6] = a6;
+                    B[i + ii][(j + 16) % 8 + 7] = a7;
+                }
+
+                for (int k = j + 8; k < j + 16; k += 8)
+                    for (int ii = 0; ii < 4; ii++)
+                    {
+                        a0 = B[i + ii][k % 8 + 0];
+                        a1 = B[i + ii][k % 8 + 1];
+                        a2 = B[i + ii][k % 8 + 2];
+                        a3 = B[i + ii][k % 8 + 3];
+
+                        B[j + 0][i + ii + (k == j + 8) ? 0 : 4] = a0;
+                        B[j + 1][i + ii + (k == j + 8) ? 0 : 4] = a1;
+                        B[j + 2][i + ii + (k == j + 8) ? 0 : 4] = a2;
+                        B[j + 3][i + ii + (k == j + 8) ? 0 : 4] = a3;
+                    }
+
+                for (int k = j + 12; k < j + 20; k += 8)
+                    for (int ii = 0; ii < 4; ii++)
+                    {
+                        a0 = B[i + ii][k % 8 + 0];
+                        a1 = B[i + ii][k % 8 + 1];
+                        a2 = B[i + ii][k % 8 + 2];
+                        a3 = B[i + ii][k % 8 + 3];
+
+                        B[j + 4][i + ii + (k == j + 12) ? 0 : 4] = a0;
+                        B[j + 5][i + ii + (k == j + 12) ? 0 : 4] = a1;
+                        B[j + 6][i + ii + (k == j + 12) ? 0 : 4] = a2;
+                        B[j + 7][i + ii + (k == j + 12) ? 0 : 4] = a3;
+                    }
+            }
+        }
+    for (int i = 0; i < 64; i += 8)
+        for (int j = 0; j < 64; j += 8)
+        {
+            if (i != j)
+            {
+                // divided into 8 X 8 Blocks
+                for (int ii = 0; ii < 8; ii += 2)
+                {
+                    // deal left 8 x 4 Blocks from top to bottom
+                    a0 = A[i + ii][j + 0];
+                    a1 = A[i + ii][j + 1];
+                    a2 = A[i + ii][j + 2];
+                    a3 = A[i + ii][j + 3];
+
+                    a4 = A[i + ii + 1][j + 0];
+                    a5 = A[i + ii + 1][j + 1];
+                    a6 = A[i + ii + 1][j + 2];
+                    a7 = A[i + ii + 1][j + 3];
+
+                    B[j + 0][i + ii] = a0;
+                    B[j + 1][i + ii] = a1;
+                    B[j + 2][i + ii] = a2;
+                    B[j + 3][i + ii] = a3;
+
+                    B[j + 0][i + ii + 1] = a4;
+                    B[j + 1][i + ii + 1] = a5;
+                    B[j + 2][i + ii + 1] = a6;
+                    B[j + 3][i + ii + 1] = a7;
+                }
+
+                j += 4;
+
+                for (int ii = 7; ii > 0; ii -= 2)
+                {
+                    // deal right 8 x 4 Blocks from bottom to top
+                    a0 = A[i + ii][j + 0];
+                    a1 = A[i + ii][j + 1];
+                    a2 = A[i + ii][j + 2];
+                    a3 = A[i + ii][j + 3];
+
+                    a4 = A[i + ii - 1][j + 0];
+                    a5 = A[i + ii - 1][j + 1];
+                    a6 = A[i + ii - 1][j + 2];
+                    a7 = A[i + ii - 1][j + 3];
+
+                    B[j + 0][i + ii] = a0;
+                    B[j + 1][i + ii] = a1;
+                    B[j + 2][i + ii] = a2;
+                    B[j + 3][i + ii] = a3;
+
+                    B[j + 0][i + ii - 1] = a4;
+                    B[j + 1][i + ii - 1] = a5;
+                    B[j + 2][i + ii - 1] = a6;
+                    B[j + 3][i + ii - 1] = a7;
+                }
+
+                j -= 4;
+            }
         }
 }
 
@@ -402,79 +479,79 @@ void test8x8_trans(int M, int N, int A[N][M], int B[M][N])
 {
     int a0, a1, a2, a3;
     int a4, a5, a6, a7;
-    for(int i = 0; i < 64; i+=8)
-        for(int j = 0; j < 64; j+=8)
+    for (int i = 0; i < 64; i += 8)
+        for (int j = 0; j < 64; j += 8)
         {
-             for(int ii = 0; ii < 4; ii++)
-             {
-                 a0 = A[i+ii][j+0];
-                 a1 = A[i+ii][j+1];
-                 a2 = A[i+ii][j+2];
-                 a3 = A[i+ii][j+3];
-                 a4 = A[i+ii][j+4];
-                 a5 = A[i+ii][j+5];
-                 a6 = A[i+ii][j+6];
-                 a7 = A[i+ii][j+7];
+            for (int ii = 0; ii < 4; ii++)
+            {
+                a0 = A[i + ii][j + 0];
+                a1 = A[i + ii][j + 1];
+                a2 = A[i + ii][j + 2];
+                a3 = A[i + ii][j + 3];
+                a4 = A[i + ii][j + 4];
+                a5 = A[i + ii][j + 5];
+                a6 = A[i + ii][j + 6];
+                a7 = A[i + ii][j + 7];
 
-                 B[i+ii][(j+8)%8 + 0] = a0;
-                 B[i+ii][(j+8)%8 + 1] = a1;
-                 B[i+ii][(j+8)%8 + 2] = a2;
-                 B[i+ii][(j+8)%8 + 3] = a3;
-                 B[i+ii][(j+8)%8 + 4] = a4;
-                 B[i+ii][(j+8)%8 + 5] = a5;
-                 B[i+ii][(j+8)%8 + 6] = a6;
-                 B[i+ii][(j+8)%8 + 7] = a7;
-             }
+                B[i + ii][(j + 8) % 8 + 0] = a0;
+                B[i + ii][(j + 8) % 8 + 1] = a1;
+                B[i + ii][(j + 8) % 8 + 2] = a2;
+                B[i + ii][(j + 8) % 8 + 3] = a3;
+                B[i + ii][(j + 8) % 8 + 4] = a4;
+                B[i + ii][(j + 8) % 8 + 5] = a5;
+                B[i + ii][(j + 8) % 8 + 6] = a6;
+                B[i + ii][(j + 8) % 8 + 7] = a7;
+            }
 
-             for(int ii = 4; ii < 8; ii++)
-             {
-                 a0 = A[i+ii][j+0];
-                 a1 = A[i+ii][j+1];
-                 a2 = A[i+ii][j+2];
-                 a3 = A[i+ii][j+3];
-                 a4 = A[i+ii][j+4];
-                 a5 = A[i+ii][j+5];
-                 a6 = A[i+ii][j+6];
-                 a7 = A[i+ii][j+7];
+            for (int ii = 4; ii < 8; ii++)
+            {
+                a0 = A[i + ii][j + 0];
+                a1 = A[i + ii][j + 1];
+                a2 = A[i + ii][j + 2];
+                a3 = A[i + ii][j + 3];
+                a4 = A[i + ii][j + 4];
+                a5 = A[i + ii][j + 5];
+                a6 = A[i + ii][j + 6];
+                a7 = A[i + ii][j + 7];
 
-                 B[i+ii][(j+16)%8 + 0] = a0;
-                 B[i+ii][(j+16)%8 + 1] = a1;
-                 B[i+ii][(j+16)%8 + 2] = a2;
-                 B[i+ii][(j+16)%8 + 3] = a3;
-                 B[i+ii][(j+16)%8 + 4] = a4;
-                 B[i+ii][(j+16)%8 + 5] = a5;
-                 B[i+ii][(j+16)%8 + 6] = a6;
-                 B[i+ii][(j+16)%8 + 7] = a7;
-             }
+                B[i + ii][(j + 16) % 8 + 0] = a0;
+                B[i + ii][(j + 16) % 8 + 1] = a1;
+                B[i + ii][(j + 16) % 8 + 2] = a2;
+                B[i + ii][(j + 16) % 8 + 3] = a3;
+                B[i + ii][(j + 16) % 8 + 4] = a4;
+                B[i + ii][(j + 16) % 8 + 5] = a5;
+                B[i + ii][(j + 16) % 8 + 6] = a6;
+                B[i + ii][(j + 16) % 8 + 7] = a7;
+            }
 
-             for(int k = j+8; k < j + 16; k+=8)
-             for(int ii = 0; ii < 4; ii++)
-             {
-                 a0 = B[i+ii][k%8 + 0];
-                 a1 = B[i+ii][k%8 + 1];
-                 a2 = B[i+ii][k%8 + 2];
-                 a3 = B[i+ii][k%8 + 3];
+            for (int k = j + 8; k < j + 16; k += 8)
+                for (int ii = 0; ii < 4; ii++)
+                {
+                    a0 = B[i + ii][k % 8 + 0];
+                    a1 = B[i + ii][k % 8 + 1];
+                    a2 = B[i + ii][k % 8 + 2];
+                    a3 = B[i + ii][k % 8 + 3];
 
-                 B[j + 0][i+ii + (k==j+8)?0:4] = a0;
-                 B[j + 1][i+ii + (k==j+8)?0:4] = a1;
-                 B[j + 2][i+ii + (k==j+8)?0:4] = a2;
-                 B[j + 3][i+ii + (k==j+8)?0:4] = a3;
-             }
+                    B[j + 0][i + ii + (k == j + 8) ? 0 : 4] = a0;
+                    B[j + 1][i + ii + (k == j + 8) ? 0 : 4] = a1;
+                    B[j + 2][i + ii + (k == j + 8) ? 0 : 4] = a2;
+                    B[j + 3][i + ii + (k == j + 8) ? 0 : 4] = a3;
+                }
 
-             for(int k = j+12; k < j+20; k+=8)
-                 for(int ii = 0; ii < 4; ii++)
-                 {
-                     a0 = B[i+ii][k%8 + 0];
-                     a1 = B[i+ii][k%8 + 1];
-                     a2 = B[i+ii][k%8 + 2];
-                     a3 = B[i+ii][k%8 + 3];
+            for (int k = j + 12; k < j + 20; k += 8)
+                for (int ii = 0; ii < 4; ii++)
+                {
+                    a0 = B[i + ii][k % 8 + 0];
+                    a1 = B[i + ii][k % 8 + 1];
+                    a2 = B[i + ii][k % 8 + 2];
+                    a3 = B[i + ii][k % 8 + 3];
 
-                     B[j + 4][i+ii + (k==j+12)?0:4] = a0;
-                     B[j + 5][i+ii + (k==j+12)?0:4] = a1;
-                     B[j + 6][i+ii + (k==j+12)?0:4] = a2;
-                     B[j + 7][i+ii + (k==j+12)?0:4] = a3;
-                 }
-         }
+                    B[j + 4][i + ii + (k == j + 12) ? 0 : 4] = a0;
+                    B[j + 5][i + ii + (k == j + 12) ? 0 : 4] = a1;
+                    B[j + 6][i + ii + (k == j + 12) ? 0 : 4] = a2;
+                    B[j + 7][i + ii + (k == j + 12) ? 0 : 4] = a3;
+                }
+        }
 }
 
 /*
@@ -497,7 +574,7 @@ void registerFunctions()
     registerTransFunction(test2_trans, trans_test2_desc);
 
     registerTransFunction(test3_trans, trans_test3_desc);
-    
+
     registerTransFunction(test4_trans, trans_test4_desc);
 
     registerTransFunction(test8x8_trans, trans_test8x8_desc);
