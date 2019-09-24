@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <io.h>
+#include <process.h>
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
@@ -180,28 +182,36 @@ void eval(char *cmdline)
     if(argv[0] == NULL)
         return;     /* Ignore empty lines */
     
+    
     if(!builtin_cmd(argv))
     {
+        int state;
+        sigset_t mask_all, mask_one, prev_one;
+        sigfillset(&mask_all);
+        sigemptyset(&mask_one);
+        sigaddset(&mask_one, SIGCHLD);
+        
+        sigprocmask(SIG_BLOCK, &mask_one, &prev_one);       /* Block SIGCHLD */
         if((pid = Fork()) == 0)   /* Child runs user job */
         {
+            setpgid(0,0);
+            sigprocmask(SIG_BLOCK, &prev_one, NULL);        /* Unblock SIGCHLD */
             if(execve(argv[0], argv, environ) < 0)
             {
                 printf("%s: Command not found.\n", argv[0]);
                 exit(0);
             }
         }
+        sigprocmask(SIG_BLOCK, &mask_all, NULL);            /* Block All */
+        state = bg?BG:FG;
+        addjob(jobs, pid, state, cmdline);
+        sigprocmask(SIG_SETMASK, &prev_one, NULL);          /* restore */
         
         /* Parent waits for foreground job to terminate */
         if (!bg)
         {
-            int status;
-            if (waitpid(pid, &status, 0) < 0)
-            {
-                unix_error("waitfg: waitpid error");
-            }
+            waitfg(pid);
         }
-        else
-            printf("%d %s", pid, cmdline);
     }
     return;
 }
@@ -273,6 +283,16 @@ int builtin_cmd(char **argv)
         exit(0);
     if(!strcmp(argv[0], "&"))        /* Ignore singleton */
         return 1;
+    if((!strcmp(argv[0], "fg")) || (!strcmp(argv[0], "bg")))
+    {
+        do_bgfg(argv);
+        return 1;
+    }
+    if(!strcmp(argv[0], "jobs"))
+    {
+        listjobs(jobs);
+        return 1;
+    }
     return 0;     /* not a builtin command */
 }
 
@@ -289,6 +309,7 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
+    waitpid(pid, NULL, 0);
     return;
 }
 
@@ -305,12 +326,18 @@ void waitfg(pid_t pid)
  */
 void sigchld_handler(int sig) 
 {
+    pid_t pid;
+    int status;
     int old_errno = errno;
-    while(waitpid(-1, NULL, 0) > 0)
-        ;
-    if(errno != ECHILD)
-        sio_error("waitpid error");
-        
+    while((pid = waitpid(-1, &status, 0)) > 0)
+    {
+        if(errno != ECHILD)
+            sio_error("waitpid error");
+        if(WIFEXITED(status))
+        {
+            deletejob(jobs, pid);
+        }
+    }
     errno = old_errno;
     return;
 }
