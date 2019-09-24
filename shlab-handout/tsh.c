@@ -85,8 +85,10 @@ void app_error(char *msg);
 typedef void handler_t(int);
 handler_t *Signal(int signum, handler_t *handler);
 
-/* wrapper function */
+/* csapp function */
 pid_t Fork(void);
+ssize_t sio_puts(char s[]);
+void sio_error(char s[]);
 
 /*
  * main - The shell's main routine 
@@ -193,7 +195,7 @@ void eval(char *cmdline)
         if (!bg)
         {
             int status;
-            if (waitpid(pid, &status, 0)<0)
+            if (waitpid(pid, &status, 0) < 0)
             {
                 unix_error("waitfg: waitpid error");
             }
@@ -303,6 +305,13 @@ void waitfg(pid_t pid)
  */
 void sigchld_handler(int sig) 
 {
+    int old_errno = errno;
+    while(waitpid(-1, NULL, 0) > 0)
+        ;
+    if(errno != ECHILD)
+        sio_error("waitpid error");
+        
+    errno = old_errno;
     return;
 }
 
@@ -551,7 +560,7 @@ void sigquit_handler(int sig)
 
  
  /****************************
- * wrapper function
+ * csapp function
  ****************************/
 /* $begin forkwrapper */
 pid_t Fork(void) 
@@ -563,5 +572,26 @@ pid_t Fork(void)
     return pid;
 }
 /* $end forkwrapper */
+
+/* sio_strlen - Return length of string (from K&R) */
+static size_t sio_strlen(char s[])
+{
+    int i = 0;
+
+    while (s[i] != '\0')
+        ++i;
+    return i;
+}
+
+ssize_t sio_puts(char s[]) /* Put string */
+{
+    return write(STDOUT_FILENO, s, sio_strlen(s)); //line:csapp:siostrlen
+}
+
+void sio_error(char s[]) /* Put error message and exit */
+{
+    sio_puts(s);
+    _exit(1);                                      //line:csapp:sioexit
+}
 
 
