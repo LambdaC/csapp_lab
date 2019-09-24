@@ -25,6 +25,8 @@
 #define BG 2    /* running in background */
 #define ST 3    /* stopped */
 
+#define DEBUG_FLAG 0 /* if print debug string */
+
 /* 
  * Jobs states: FG (foreground), BG (background), ST (stopped)
  * Job state transitions and enabling actions:
@@ -141,6 +143,7 @@ int main(int argc, char **argv)
 	    printf("%s", prompt);
 	    fflush(stdout);
 	}
+    
 	if ((fgets(cmdline, MAXLINE, stdin) == NULL) && ferror(stdin))
 	    app_error("fgets error");
 	if (feof(stdin)) { /* End of file (ctrl-d) */
@@ -170,6 +173,11 @@ int main(int argc, char **argv)
 */
 void eval(char *cmdline) 
 {
+    if(DEBUG_FLAG)
+    {
+        printf("cmdline: %s\n", cmdline);
+        fflush(stdout);
+    }
     char *argv[MAXARGS];    /* Arugument list execve() */
     char buf[MAXLINE];      /* Holds modified command line */
     int bg;                 /* Should the job run in bg or fg? */
@@ -193,23 +201,32 @@ void eval(char *cmdline)
         if((pid = Fork()) == 0)   /* Child runs user job */
         {
             setpgid(0,0);
-            sigprocmask(SIG_BLOCK, &prev_one, NULL);        /* Unblock SIGCHLD */
+            sigprocmask(SIG_SETMASK, &prev_one, NULL);        /* Unblock SIGCHLD */
             if(execve(argv[0], argv, environ) < 0)
             {
                 printf("%s: Command not found.\n", argv[0]);
+                fflush(stdout);
                 exit(0);
             }
         }
-        sigprocmask(SIG_BLOCK, &mask_all, NULL);            /* Block All */
+        
         state = bg?BG:FG;
         addjob(jobs, pid, state, cmdline);
-        sigprocmask(SIG_SETMASK, &prev_one, NULL);          /* restore */
         
         /* Parent waits for foreground job to terminate */
         if (!bg)
         {
             waitfg(pid);
+            
         }
+        else
+        {
+            struct job_t *job = getjobpid(jobs, pid);
+            printf("[%d] (%d) %s", job->jid, job->pid, job->cmdline);
+            fflush(stdout);
+        }
+        
+        sigprocmask(SIG_SETMASK, &prev_one, NULL);        /* Unblock SIGCHLD */
     }
     return;
 }
@@ -307,7 +324,19 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
-    waitpid(pid, NULL, 0);
+    sigset_t mask;
+    sigemptyset(&mask);
+    if(DEBUG_FLAG && 1)
+    {
+        printf("waitfg Beginnnn!\n");
+        fflush(stdout);
+    }
+    sigsuspend(&mask);
+    if(DEBUG_FLAG && 1)
+    {
+        printf("waitfg Enddddd!\n");
+        fflush(stdout);
+    }
     return;
 }
 
@@ -327,14 +356,20 @@ void sigchld_handler(int sig)
     pid_t pid;
     int status;
     int old_errno = errno;
-    while((pid = waitpid(-1, &status, 0)) > 0)
+    if(DEBUG_FLAG && 1)
     {
-        if(errno != ECHILD)
-            sio_error("waitpid error");
-        if(WIFEXITED(status))
+        fprintf(stdout, "handle SIGCHLD\n");
+        fflush(stdout);
+    }
+    while((pid = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+        struct job_t *job = getjobpid(jobs, pid);
+        if(DEBUG_FLAG && 1)
         {
-            deletejob(jobs, pid);
+            fprintf(stdout, "[%d] [%d] %s reaped!\n", job->jid, job->pid, job->cmdline); 
+            fflush(stdout);
         }
+        deletejob(jobs, pid);
     }
     errno = old_errno;
     return;
@@ -345,8 +380,25 @@ void sigchld_handler(int sig)
  *    user types ctrl-c at the keyboard.  Catch it and send it along
  *    to the foreground job.  
  */
-void sigint_handler(int sig) 
+void sigint_handler(int sig)
 {
+    if(DEBUG_FLAG && 1)
+    {
+        printf("handle SIGINT\n");
+        fflush(stdout);
+    }
+    pid_t pid;
+    if((pid = fgpid(jobs)) > 0)
+    {
+        struct job_t *job = getjobpid(jobs, pid);
+        printf("Job [%d] (%d) terminated by signal 2\n", job->jid, job->pid);
+        
+        kill(pid, SIGKILL);
+        sigset_t mask;
+        sigemptyset(&mask);
+        sigsuspend(&mask);
+    }
+    
     return;
 }
 
@@ -357,6 +409,14 @@ void sigint_handler(int sig)
  */
 void sigtstp_handler(int sig) 
 {
+    pid_t pid;
+   if((pid = fgpid(jobs)) > 0)
+    {
+        struct job_t *job = getjobpid(jobs, pid);
+        job->state = ST;
+        kill(pid, 20);
+        printf("Job [%d] (%d) Stopped by signal 20\n", job->jid, job->pid);
+    }
     return;
 }
 
