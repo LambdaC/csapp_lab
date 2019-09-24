@@ -85,6 +85,9 @@ void app_error(char *msg);
 typedef void handler_t(int);
 handler_t *Signal(int signum, handler_t *handler);
 
+/* wrapper function */
+pid_t Fork(void);
+
 /*
  * main - The shell's main routine 
  */
@@ -165,6 +168,39 @@ int main(int argc, char **argv)
 */
 void eval(char *cmdline) 
 {
+    char *argv[MAXARGS];    /* Arugument list execve() */
+    char buf[MAXLINE];      /* Holds modified command line */
+    int bg;                 /* Should the job run in bg or fg? */
+    pid_t pid;              /* Process id */
+    
+    strcpy(buf, cmdline);
+    bg = parseline(buf, argv);
+    if(argv[0] == NULL)
+        return;     /* Ignore empty lines */
+    
+    if(!builtin_cmd(argv))
+    {
+        if((pid = Fork()) == 0)   /* Child runs user job */
+        {
+            if(execve(argv[0], argv, environ) < 0)
+            {
+                printf("%s: Command not found.\n", argv[0]);
+                exit(0);
+            }
+        }
+        
+        /* Parent waits for foreground job to terminate */
+        if (!bg)
+        {
+            int status;
+            if (waitpid(pid, &status, 0)<0)
+            {
+                unix_error("waitfg: waitpid error");
+            }
+        }
+        else
+            printf("%d %s", pid, cmdline);
+    }
     return;
 }
 
@@ -231,6 +267,10 @@ int parseline(const char *cmdline, char **argv)
  */
 int builtin_cmd(char **argv) 
 {
+    if(!strcmp(argv[0], "quit"))     /* quit command */
+        exit(0);
+    if(!strcmp(argv[0], "&"))        /* Ignore singleton */
+        return 1;
     return 0;     /* not a builtin command */
 }
 
@@ -505,5 +545,23 @@ void sigquit_handler(int sig)
     exit(1);
 }
 
+/****************************
+ * End other helper routines
+ ****************************/
+
+ 
+ /****************************
+ * wrapper function
+ ****************************/
+/* $begin forkwrapper */
+pid_t Fork(void) 
+{
+    pid_t pid;
+
+    if ((pid = fork()) < 0)
+	unix_error("Fork error");
+    return pid;
+}
+/* $end forkwrapper */
 
 
