@@ -316,6 +316,77 @@ int builtin_cmd(char **argv)
  */
 void do_bgfg(char **argv) 
 {
+    char *op = argv[0];
+    char c;
+    struct job_t *job = NULL;
+    int id;
+    if(argv[1] == NULL)
+    {
+        printf("%s command requires PID or %%jobid argument\n", op);
+        fflush(stdout);
+        return;
+    }
+    else
+    {
+        c = argv[1][0];
+        if(c != '%' && !(c >= '0' && c <= '9'))
+        {
+            printf("%s: argument must be a PID or %%jobid\n", op);
+            fflush(stdout);
+            return;
+        }
+    }
+    
+    if(c == '%')
+    {
+        id = atoi(argv[1]+1);
+        job = getjobjid(jobs, id);
+        if(job == NULL)
+        {
+            printf("%s: No such job\n", argv[1]);
+            fflush(stdout);
+            return;
+        }
+    }
+    else
+    {
+        id = atoi(argv[1]);
+        job = getjobpid(jobs, id);
+        if(job == NULL)
+        {
+            printf("(%d): No such process\n", id);
+            fflush(stdout);
+            return;
+        }
+    }
+    
+    if(!strcmp(op, "bg"))
+    {
+        sigset_t mask;
+        sigemptyset(&mask);
+        if(job->state == ST)
+        {
+            printf("[%d] (%d) %s", job->jid, job->pid, job->cmdline);
+            fflush(stdout);
+            kill(-(job->pid), SIGCONT);
+            sigsuspend(&mask);
+        }
+        job->state = BG;
+        
+    }
+    else
+    {
+        sigset_t mask;
+        sigemptyset(&mask);
+        if(job->state == ST)
+        {
+            kill(-(job->pid), SIGCONT);
+            sigsuspend(&mask);
+        }
+        job->state = FG;
+        waitfg(job->pid);
+    }
+    
     return;
 }
 
@@ -391,12 +462,21 @@ void sigint_handler(int sig)
     if((pid = fgpid(jobs)) > 0)
     {
         struct job_t *job = getjobpid(jobs, pid);
-        printf("Job [%d] (%d) terminated by signal 2\n", job->jid, job->pid);
-        
-        kill(pid, SIGKILL);
         sigset_t mask;
         sigemptyset(&mask);
+        kill(-pid, SIGKILL);
+        if(DEBUG_FLAG)
+        {
+            printf("sigint_handler begin waitting\n");
+            fflush(stdout);
+        }
+        printf("Job [%d] (%d) terminated by signal 2\n", job->jid, job->pid);
         sigsuspend(&mask);
+        if(DEBUG_FLAG)
+        {
+            printf("sigint_handler end waitting\n");
+            fflush(stdout);
+        }
     }
     
     return;
@@ -414,7 +494,10 @@ void sigtstp_handler(int sig)
     {
         struct job_t *job = getjobpid(jobs, pid);
         job->state = ST;
-        kill(pid, 20);
+        sigset_t mask;
+        sigemptyset(&mask);
+        kill(-pid, SIGTSTP);
+        sigsuspend(&mask);
         printf("Job [%d] (%d) Stopped by signal 20\n", job->jid, job->pid);
     }
     return;
