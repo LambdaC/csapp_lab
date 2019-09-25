@@ -469,7 +469,6 @@ void sigtstp_handler(int sig)
         sigemptyset(&mask);
         kill(-pid, SIGTSTP);
         sigsuspend(&mask);
-        printf("Job [%d] (%d) Stopped by signal 20\n", job->jid, job->pid);
     }
     return;
 }
