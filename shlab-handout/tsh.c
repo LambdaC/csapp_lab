@@ -25,8 +25,6 @@
 #define BG 2    /* running in background */
 #define ST 3    /* stopped */
 
-#define DEBUG_FLAG 0 /* if print debug string */
-
 /* 
  * Jobs states: FG (foreground), BG (background), ST (stopped)
  * Job state transitions and enabling actions:
@@ -173,11 +171,6 @@ int main(int argc, char **argv)
 */
 void eval(char *cmdline) 
 {
-    if(DEBUG_FLAG)
-    {
-        printf("cmdline: %s\n", cmdline);
-        fflush(stdout);
-    }
     char *argv[MAXARGS];    /* Arugument list execve() */
     char buf[MAXLINE];      /* Holds modified command line */
     int bg;                 /* Should the job run in bg or fg? */
@@ -397,17 +390,7 @@ void waitfg(pid_t pid)
 {
     sigset_t mask;
     sigemptyset(&mask);
-    if(DEBUG_FLAG && 1)
-    {
-        printf("waitfg Beginnnn!\n");
-        fflush(stdout);
-    }
     sigsuspend(&mask);
-    if(DEBUG_FLAG && 1)
-    {
-        printf("waitfg Enddddd!\n");
-        fflush(stdout);
-    }
     return;
 }
 
@@ -427,19 +410,8 @@ void sigchld_handler(int sig)
     pid_t pid;
     int status;
     int old_errno = errno;
-    if(DEBUG_FLAG && 1)
-    {
-        fprintf(stdout, "handle SIGCHLD\n");
-        fflush(stdout);
-    }
     while((pid = waitpid(-1, &status, WNOHANG)) > 0)
     {
-        struct job_t *job = getjobpid(jobs, pid);
-        if(DEBUG_FLAG && 1)
-        {
-            fprintf(stdout, "[%d] [%d] %s reaped!\n", job->jid, job->pid, job->cmdline); 
-            fflush(stdout);
-        }
         deletejob(jobs, pid);
     }
     errno = old_errno;
@@ -453,11 +425,6 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig)
 {
-    if(DEBUG_FLAG && 1)
-    {
-        printf("handle SIGINT\n");
-        fflush(stdout);
-    }
     pid_t pid;
     if((pid = fgpid(jobs)) > 0)
     {
@@ -465,18 +432,8 @@ void sigint_handler(int sig)
         sigset_t mask;
         sigemptyset(&mask);
         kill(-pid, SIGKILL);
-        if(DEBUG_FLAG)
-        {
-            printf("sigint_handler begin waitting\n");
-            fflush(stdout);
-        }
         printf("Job [%d] (%d) terminated by signal 2\n", job->jid, job->pid);
         sigsuspend(&mask);
-        if(DEBUG_FLAG)
-        {
-            printf("sigint_handler end waitting\n");
-            fflush(stdout);
-        }
     }
     
     return;
